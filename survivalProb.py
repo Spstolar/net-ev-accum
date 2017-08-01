@@ -7,11 +7,13 @@ mean1 = 0.1
 mean2 = -0.1
 var1 = 1
 var2 = 1
+bdy_plus = 1
+bdy_minus = -1
 # # Observations are drawn from the Norm(mean1, var1) distribution.
 # obs = np.sqrt(var1) * np.random.randn(length) + mean1  # scale and translate draws from the standard distribution
-runs = int(1e5)
-theta = 1
+runs = int(1e4)
 exit_times = np.zeros(runs)
+correct = 0
 
 class Dist:
     """We define a class for distributions so that we can easily access the truth distributions rather than writing out
@@ -43,15 +45,19 @@ def compute_llr(x_array, dist1, dist2):
 for r in range(runs):
     ev = 0
     T = 0
-    while np.abs(ev) < theta:
+    while (np.abs(ev) < bdy_plus) and (np.abs(ev) > bdy_minus):
         obs = np.sqrt(var1) * np.random.randn(1) + mean1
         ev += compute_llr(obs, pos.prob, neg.prob)
         T += 1
+    if ev > bdy_plus:
+        correct += 1
     exit_times[r] = T
 
 
 # The last part here plots time (in steps) against the accumulated evidence. After adding modifications to the plot we
 # then call it using the show() method.
+
+print "Correct: " + str(100 * correct / runs) + "%"
 plt.hist(exit_times, 50, normed=1, facecolor='green', alpha=0.75)
 
 np.save('exit_times.npy', exit_times)

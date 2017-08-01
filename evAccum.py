@@ -7,6 +7,9 @@ mean1 = 0.1
 mean2 = -0.1
 var1 = 1
 var2 = 1
+bdy_plus = 3
+bdy_minus = -3
+
 # Observations are drawn from the Norm(mean1, var1) distribution.
 obs = np.sqrt(var1) * np.random.randn(length) + mean1  # scale and translate draws from the standard distribution
 
@@ -49,7 +52,7 @@ plt.xlabel('Time')
 plt.ylabel('LLR')
 plt.title('Evidence Accum')
 # plt.text(60, .025, r'$\mu=100,\ \sigma=15$')
-# plt.axis([0, length, 0, 1])
+plt.axis([0, length, bdy_minus, bdy_plus])
 # plt.grid(True)
 plt.show()
 
