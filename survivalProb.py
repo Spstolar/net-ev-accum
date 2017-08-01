@@ -7,12 +7,18 @@ mean1 = 0.1
 mean2 = -0.1
 var1 = 1
 var2 = 1
-bdy_plus = 1
-bdy_minus = -1
+bdy_plus = 0.9
+bdy_minus = -3
 # # Observations are drawn from the Norm(mean1, var1) distribution.
 # obs = np.sqrt(var1) * np.random.randn(length) + mean1  # scale and translate draws from the standard distribution
-runs = int(1e4)
+runs = int(1e5)
+max_time = 500
 exit_times = np.zeros(runs)
+
+paths_plus = np.zeros(max_time)  # How many sims have chosen H^+
+paths_minus = np.zeros(max_time)  # ^^ H^-
+paths_pos = np.zeros(max_time)  # How many sims have not exited and are positive
+paths_neg = np.zeros(max_time)  # How many sims have not exited and are negative
 correct = 0
 
 class Dist:
@@ -45,12 +51,23 @@ def compute_llr(x_array, dist1, dist2):
 for r in range(runs):
     ev = 0
     T = 0
-    while (np.abs(ev) < bdy_plus) and (np.abs(ev) > bdy_minus):
+    time = 0
+    while (ev < bdy_plus) and (ev > bdy_minus) and (time < max_time):
+        if ev >= 0:
+            paths_pos[time] += 1
+        else:
+            paths_neg[time] += 1
+        time += 1
         obs = np.sqrt(var1) * np.random.randn(1) + mean1
         ev += compute_llr(obs, pos.prob, neg.prob)
         T += 1
-    if ev > bdy_plus:
+
+    if ev >= bdy_plus:
         correct += 1
+        paths_plus[T:] += 1
+    else:
+        paths_minus[T:] += 1
+
     exit_times[r] = T
 
 
@@ -61,6 +78,9 @@ print "Correct: " + str(100 * correct / runs) + "%"
 plt.hist(exit_times, 50, normed=1, facecolor='green', alpha=0.75)
 
 np.save('exit_times.npy', exit_times)
+
+path_data = np.vstack((paths_plus, paths_minus, paths_pos, paths_neg))
+np.save('path_data.npy', path_data)
 
 plt.xlabel('Time')
 plt.ylabel('LLR')
