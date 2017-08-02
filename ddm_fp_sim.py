@@ -23,10 +23,10 @@ tvec = np.linspace(0,T,Nt)  # split time into dt sized bins
 Pp = np.zeros((Nx,Nt)) 
 zero_ind = np.argmin(abs(xvec))  # grab the index of the zero or the xvalue closest to zero
 Pp[zero_ind,0] = 1.0 / dx  # we want probability to be concentrated at the zero cell, so it should have area 1
-Pm = Pp
+Pm = np.copy(Pp)
 surv_prob_P = np.zeros(Nt)
 surv_prob_P[0] = 1 
-surv_prob_M = surv_prob_P
+surv_prob_M = np.copy(surv_prob_P)
 
 # Crank-Nicolson discretization of diffusion
 scaling_term = (s * s) / (2 * dx * dx)
@@ -34,7 +34,8 @@ D = scaling_term * (np.eye(Nx,k=1) -2 * np.eye(Nx,k=0) + np.eye(Nx,k=-1))  # sca
 
 # discretization of advection for plus and minus drift
 Ap = (-g / dx) * (np.eye(Nx,k=1) - np.eye(Nx,k=0))
-Am = -1 * Ap
+#Am = (-g / dx) * (np.eye(Nx,k=-1) - np.eye(Nx,k=0))
+Am = -np.copy(Ap)
 
 # create Crank-Nicolson step matrices
 diff_inverse = np.linalg.inv(np.eye(Nx) - (dt/2)*D)
