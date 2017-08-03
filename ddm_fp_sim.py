@@ -52,16 +52,18 @@ for j in range(1,Nt):  # j from 1 to Nt-1
     right_pos = dx * np.sum(Pp[zero_ind:, j])
     right_neg = dx * np.sum(Pm[zero_ind:, j])
     pos_surv_pos[j] = right_pos / surv_prob_P[j]
-    pos_surv_neg[j] = right_pos / surv_prob_M[j]
+    pos_surv_neg[j] = right_neg / surv_prob_M[j]
 
 
 plt.figure(1)
 plt.pcolormesh(xvec, tvec, Pp.T, cmap='hot', vmin=0, vmax=0.2)  # pcolormesh is much faster than pcolor for large arrays
+plt.axvline(x=0)
 plt.axis('off')
 # shading flat  # flat is actually the default shading option
 
 plt.figure(2)
 plt.pcolormesh(xvec, tvec, Pm.T, cmap='hot', vmin=0, vmax=0.2)
+plt.axvline(x=0)
 plt.axis('off')
 
 
@@ -73,11 +75,15 @@ max_info = np.amax(u)
 y_max = np.amax((max_info, 1)) + 0.5
 plt.plot(tvec, u, 'k--', linewidth=8)  # non-decision information
 plt.axis([0, T, 0, max_info + y_max])
-r_prob_ratio = np.log(pos_surv_pos / pos_surv_neg)  # log R_+ / R_-  clique info
-plt.plot(tvec, r_prob_ratio, color='orange', linewidth=4)
 #set(gca,'xtick',[])
 #set(gca,'ytick',[0:3])
 #set(gca,'fontsize',30)
 
+plt.figure(4)
+plt.plot(tvec, pos_surv_pos, color='orange', linewidth=2, label='R+')
+plt.plot(tvec, pos_surv_neg, color='blue', linewidth=2, label='R-')
+r_prob_ratio = np.log(pos_surv_pos / pos_surv_neg)  # log R_+ / R_-  clique info
+plt.plot(tvec, r_prob_ratio, color='purple', linewidth=4, label='Info')
+plt.legend()
 
 plt.show()
