@@ -11,7 +11,7 @@ bdy_plus = 0.9
 bdy_minus = -3
 # # Observations are drawn from the Norm(mean1, var1) distribution.
 # obs = np.sqrt(var1) * np.random.randn(length) + mean1  # scale and translate draws from the standard distribution
-runs = int(1e5)
+runs = int(1e3)
 max_time = 500
 exit_times = np.zeros(runs)
 
