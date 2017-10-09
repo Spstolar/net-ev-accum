@@ -57,7 +57,7 @@ for j in range(1, Nt):  # j from 1 to Nt-1
     pos_surv_neg[j] = right_neg / surv_prob_P[j]
 
 
-np.save('surv_P.npy', Pp)
+np.save('surv_P.npy', Pp)  # Creates fairly large array, so useful to do additional editing in a different script.
 
 plt.figure(1)
 plt.plot(tvec, surv_prob_P, color='red', linewidth=8)  # survival prob
