@@ -36,6 +36,7 @@ surv_prob_P[0] = 1
 pos_surv_pos = np.zeros(Nt)  # probability mass above zero but not escaping given H^+
 pos_surv_neg = np.zeros(Nt)  # ^^ for H^-
 
+
 # Crank-Nicolson discretization of diffusion
 scaling_term = (s * s) / (2 * dx * dx)
 D = scaling_term * (np.eye(Nx, k=1) - 2 * np.eye(Nx, k=0) + np.eye(Nx, k=-1))  # scalar * (diagonal -2, off diagonals 1)
@@ -57,7 +58,10 @@ for j in range(1, Nt):  # j from 1 to Nt-1
     pos_surv_neg[j] = right_neg / surv_prob_P[j]
 
 
-np.save('surv_P.npy', Pp)  # Creates fairly large array, so useful to do additional editing in a different script.
+# np.save('prob_mass.npy', Pp)  # Creates fairly large array, so useful to do additional editing in a different script.
+np.save('survival_prob.npy', surv_prob_P)
+np.save('pos_LLR_prob.npy', pos_surv_pos)
+
 
 plt.figure(1)
 plt.plot(tvec, surv_prob_P, color='red', linewidth=8)  # survival prob
