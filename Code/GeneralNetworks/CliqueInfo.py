@@ -2,6 +2,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import stats
 
+"""
+This does a few things:
+1. Plots first exit probabilities.
+2. Computes the information from knowing an agent has positive LLR.
+3. Computes probabilities for different numbers of correct agents.
+4. Plots the expected amount of information agents receive after a first-decider and agreement wave.
+"""
+
 
 total_agents = 1000  # this includes the first agent to fire
 

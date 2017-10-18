@@ -70,7 +70,7 @@ for k, num_agents in enumerate(range(10,100)):
 
 #plot escape times and compute mean
 
-plt.scatter(np.arange(ag_min, ag_max), expected_exit_time)
+plt.scatter(np.arange(ag_min, ag_max), expected_exit_time)  # use plt.loglog after the appropriate sims are done
 plt.xlabel('Number of Agents')
 plt.ylabel('Expected Exit Time')
 plt.title('Expected First Exit Time')
