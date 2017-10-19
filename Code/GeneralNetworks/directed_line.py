@@ -1,21 +1,17 @@
 import numpy as np
 import matplotlib.pyplot as plt
 """
-This is to simply simulate the first exit time distribution for a group of agents.
-Simulate n accumulators and let them independently make observations and gather evidence until one hits the boundary.
-Then log the time, store it, and restart.
+This is to simply evidence accumulation for a line of agents.
 """
 
-# Parameters for the simulation
-time_limit = 300
-num_sims = int(1e0)
-
+# How observations are drawn.
 mean1 = 0.1
 mean2 = -0.1
 var1 = 1
 var2 = 1
 bdy_plus = 3
 bdy_minus = -3
+
 
 class Dist:
     """We define a class for distributions so that we can easily access the truth distributions rather than writing out
@@ -42,59 +38,70 @@ def compute_llr(x_array, dist1, dist2):
     """
     return np.log(dist1(x_array)/dist2(x_array))
 
-s = 0
-t = 0
+# Simulation Parameters
 num_agents = 3
-bump = bdy_plus * np.ones(num_agents)
-fire = 0
-next_fire = 0
-decisions = np.zeros(num_agents)
-correct = 0
+num_sims = 1
+time_limit = 300
+bump = bdy_plus * np.ones(num_agents)  # This is how much an agent alters LLR when previous agent decides.
 llr_store = np.zeros((num_agents, time_limit))
 final_time = 0
-still_accumulating = np.ones(num_agents)
+correct = 0  # Number of correct decisions by the end agent.
 
-llr = np.zeros(num_agents)
+
+def check_decision(llr, theta_minus, theta_plus):
+    if llr > theta_plus:
+        return 1
+    elif llr < theta_minus:
+        return -1
+    else:
+        return 0
+
 for s in range(num_sims):
     decided = 0
-    while (decided == 0):
+    t = 0
+    fire = 0
+    next_fire = 0
+    llr = np.zeros(num_agents)
+    decisions = np.zeros(num_agents)
+    still_accumulating = np.ones(num_agents)
+
+    while decided == 0 and t < time_limit:
         obs = np.sqrt(var1) * np.random.randn(num_agents) + mean1  # make observations
-        llr += compute_llr(obs, pos.prob, neg.prob) * still_accumulating
-        llr_store[:,t] = llr 
+        llr += compute_llr(obs, pos.prob, neg.prob) * still_accumulating  # incorporate obs for active agents
+        if s == 0:
+            llr_store[:, t] = llr  # for visualization
+
         for a in np.arange(num_agents):
             if still_accumulating[a] == 1:  # skip all of this if the agent is done
                 fire = next_fire
-                if np.abs(llr[a]) > bdy_plus:  # check if any agent has exited
+                decisions[a] = check_decision(llr[a], bdy_minus, bdy_plus)
+
+                if decisions[a] != 0:  # check if the observation caused a decision
                     next_fire = 1
                     still_accumulating[a] = 0
-                    if llr[a] > bdy_plus:
-                        decisions[a] = 1
-                    else:
-                        decisions[a] = -1
                 else:
                     next_fire = 0
                 
-                if fire == 1 and still_accumulating[a] == 1:
+                if fire == 1 and still_accumulating[a] == 1:  # if neighbor decided, then bump
                     llr[a] += decisions[a-1] * bump[a]
-                    
-                if np.abs(llr[a]) > bdy_plus and still_accumulating[a] == 1:  # check if any agent has exited
-                    next_fire = 1
-                    still_accumulating[a] = 0
-                    if llr[a] > bdy_plus:
-                        decisions[a] = 1
-                    else:
-                        decisions[a] = -1
-                else:
-                    next_fire = 0
-        if decisions[-1] == 1:
+                    decisions[a] = check_decision(llr[a], bdy_minus, bdy_plus)
+                    if decisions[a] != 0:  # check if the bump caused a decision
+                        next_fire = 1
+                        still_accumulating[a] = 0
+
+        if decisions[-1] == 1:  # if the last agent decides, log and exit
             correct += 1
             decided = 1
-            final_time = t
+            if s == 0:
+                final_time = t + 1
         elif decisions[-1] == -1:
             decided = 1
-            final_time = t
+            if s == 0:
+                final_time = t + 1
         t += 1
-    print decisions
+
+    if s == 0:
+        print decisions
                 
 for a in range(num_agents):
     plt.plot(llr_store[a,:final_time+1], label=str(a+1))
