@@ -47,9 +47,12 @@ s = 0
 t = 0
 ag_max = 100
 ag_min = 10
-expected_exit_time = np.zeros(ag_max - ag_min)
+powers = np.arange(1,5, .1)
+agent_numbers = 10 ** powers
+agent_numbers = agent_numbers.astype(int)
+expected_exit_time = np.zeros(agent_numbers.size)
 
-for k, num_agents in enumerate(range(10,100)):
+for k, num_agents in enumerate(agent_numbers):
     llr = np.zeros(num_agents)
     while (s < num_sims):
         t += 1
@@ -70,7 +73,7 @@ for k, num_agents in enumerate(range(10,100)):
 
 #plot escape times and compute mean
 
-plt.scatter(np.arange(ag_min, ag_max), expected_exit_time)  # use plt.loglog after the appropriate sims are done
+plt.loglog(agent_numbers, expected_exit_time)
 plt.xlabel('Number of Agents')
 plt.ylabel('Expected Exit Time')
 plt.title('Expected First Exit Time')
