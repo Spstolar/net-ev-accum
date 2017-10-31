@@ -9,8 +9,9 @@ mean1 = 0.1
 mean2 = -0.1
 var1 = 1
 var2 = 1
-alpha = 0.8
-bdy_plus = np.log(alpha / (1 - alpha))
+# alpha = 0.8
+# bdy_plus = np.log(alpha / (1 - alpha))
+bdy_plus = 3
 bdy_minus = - bdy_plus
 
 
@@ -40,8 +41,8 @@ def compute_llr(x_array, dist1, dist2):
     return np.log(dist1(x_array)/dist2(x_array))
 
 # Simulation Parameters
-num_agents = 10
-num_sims = int(1e4)
+num_agents = 2
+num_sims = int(1e1)
 time_limit = int(1e3)
 bump = np.zeros(num_agents)  # This is how much an agent alters LLR when previous agent decides.
 for a in range(0,num_agents):
@@ -110,7 +111,7 @@ for s in range(num_sims):
         print decisions
 
 print correct / float(num_sims)
-                
+
 for a in range(num_agents):
     plt.plot(llr_store[a,:final_time+1], label=str(a+1))
 plt.xlabel('Time')
