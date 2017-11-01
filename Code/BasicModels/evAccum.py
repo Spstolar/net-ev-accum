@@ -44,10 +44,20 @@ def compute_llr(x_array, dist1, dist2):
     """
     return np.log(dist1(x_array)/dist2(x_array))
 
+
 # Compute and store the LLRs as a vector of accumulated evidence.
 
 llr = compute_llr(obs, pos.prob, neg.prob)
 ev = np.cumsum(llr)
+
+done = 0
+for i in range(ev.size):
+    if done == 0:
+        if ev[i] >= bdy_plus:
+            ev[i] = bdy_plus
+            done = 1
+    else:
+        ev[i] = bdy_plus
 
 # The last part here plots time (in steps) against the accumulated evidence. After adding modifications to the plot we
 # then call it using the show() method.
@@ -57,7 +67,7 @@ plt.xlabel('Time')
 plt.ylabel('LLR')
 plt.title('Evidence Accumulation')
 # plt.text(60, .025, r'$\mu=100,\ \sigma=15$')
-plt.axis([0, length, bdy_minus, bdy_plus])
+plt.axis([0, length, bdy_minus - 0.1, bdy_plus + 0.1])
 # plt.grid(True)
 plt.show()
 
