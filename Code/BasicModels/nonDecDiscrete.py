@@ -4,9 +4,9 @@ import matplotlib.pyplot as plt
 # Indexing Guide
 # -2 -1 0 1 2 3
 #     0 1 2 3
-negThresh = -50
-posThresh = 100
-N = int(1e4)  # time steps
+negThresh = -1
+posThresh = 2
+N = int(1e2 )  # time steps
 
 total_state = posThresh + np.abs(negThresh) + 1 - 2  # include 0 but exclude the threshold values
 stateVec = np.zeros(total_state)
@@ -42,8 +42,12 @@ for i in range(1,N):
     survivalProbPlus[i] = np.sum(stateTrackP[i, :])
     survivalProbMinus[i] = np.sum(stateTrackM[i, :])
 
-plt.scatter(np.arange(N), np.log(survivalProbPlus / survivalProbMinus))
+evidence = np.log(survivalProbPlus / survivalProbMinus)
+max_ev = np.ceil(np.max(evidence))
+plt.scatter(np.arange(N), evidence)
 plt.xlabel('Time')
+plt.xticks([0, N/2, N])
+plt.yticks([0, max_ev / 2.0, max_ev])
 plt.ylabel('Evidence')
 plt.title('Non-Decision Evidence for ' + r'$\theta_- = $' + str(negThresh) + r', $\theta_+ = $' + str(posThresh))
 plt.show()

@@ -72,7 +72,7 @@ plt.axvline(x=0)
 plt.axis('off')
 
 f = plt.figure()
-f.savefig("fp_plus.pdf", bbox_inches='tight')
+# f.savefig("fp_plus.pdf", bbox_inches='tight')
 # shading flat  # flat is actually the default shading option
 
 plt.figure(2)
@@ -81,13 +81,18 @@ plt.axvline(x=0)
 plt.axis('off')
 
 plt.figure(3)
-plt.plot(tvec, surv_prob_P, color='red', linewidth=8)  # survival prob H^+
-plt.plot(tvec, surv_prob_M, color='blue', linewidth=8)  # survival prob H^-
+plt.plot(tvec, surv_prob_P, color='red', linewidth=8, label=r'S_+(t)')  # survival prob H^+
+plt.plot(tvec, surv_prob_M, color='blue', linewidth=8, label=r'S_-(t)')  # survival prob H^-
 u = np.log(surv_prob_P / surv_prob_M)
 max_info = np.amax(u)
 y_max = np.amax((max_info, 1)) + 0.5
-plt.plot(tvec, u, 'k--', linewidth=8)  # non-decision information
-plt.axis([0, T, 0, max_info + y_max])
+plt.plot(tvec, u, 'k--', linewidth=8, label='Non-decision Evidence')  # non-decision information
+plt.xticks([0, T/2, T])
+plt.yticks([0, 1, max_info])
+plt.xlabel('Time')
+plt.ylabel('Probability/Evidence')
+plt.title('Survival Probabilities and Non-decision Evidence')
+plt.legend()
 
 plt.figure(4)
 plt.plot(tvec, pos_surv_pos, color='orange', linewidth=2, label='R+')
