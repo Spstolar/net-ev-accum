@@ -6,13 +6,14 @@ import matplotlib.pyplot as plt
 #     0 1 2 3
 negThresh = -1
 posThresh = 2
-N = int(1e2 )  # time steps
+N = int(1e1)  # time steps
 
 total_state = posThresh + np.abs(negThresh) + 1 - 2  # include 0 but exclude the threshold values
 stateVec = np.zeros(total_state)
 stateTrackP = np.zeros((N, total_state))
 stateTrackP[0, :] = np.zeros(total_state)
 stateTrackP[0, np.abs(negThresh) - 1] = 1  # start off with everything concentrated at 0
+# print stateTrackP[0,:]
 
 stateTrackM = np.zeros((N, total_state))
 stateTrackM[0, :] = np.zeros(total_state)
@@ -29,20 +30,27 @@ posObsProbM = negObsProbP
 survivalProbMinus = np.zeros(N)
 survivalProbMinus[0] = 1
 
-for i in range(1,N):
+for i in range(1, N):
     stateTrackP[i,:] = (negObsProbP * np.hstack((stateTrackP[i-1, 1:], 0))
                          + posObsProbP * np.hstack((0, stateTrackP[i-1, :-1]))
                          + staticObsProb * stateTrackP[i-1, :])
     # print stateTrackP[i,:]
 
     stateTrackM[i, :] = (negObsProbM * np.hstack((stateTrackM[i - 1, 1:], 0))
-                         + posObsProbM * np.hstack((0, stateTrackM[i - 1, :-1]))
-                         + staticObsProb * stateTrackM[i - 1, :])
+                         + posObsProbM * np.hstack((0, stateTrackM[i-1, :-1]))
+                         + staticObsProb * stateTrackM[i-1, :])
 
     survivalProbPlus[i] = np.sum(stateTrackP[i, :])
     survivalProbMinus[i] = np.sum(stateTrackM[i, :])
 
+print staticObsProb
+print posObsProbP
+
+print stateTrackP
+print stateTrackM
+
 evidence = np.log(survivalProbPlus / survivalProbMinus)
+
 max_ev = np.ceil(np.max(evidence))
 plt.scatter(np.arange(N), evidence)
 plt.xlabel('Time')
