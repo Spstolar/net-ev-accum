@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 #     0 1 2 3
 negThresh = -1
 posThresh = 2
-N = int(1e1)  # time steps
+N = int(1e2)  # time steps
 
 total_state = posThresh + np.abs(negThresh) + 1 - 2  # include 0 but exclude the threshold values
 stateVec = np.zeros(total_state)
