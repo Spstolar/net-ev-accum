@@ -7,12 +7,12 @@ observations and the derived information is computed exactly, rather than being 
 
 
 # Parameters for the simulation
-length = 10
+length = 1000
 p = np.e / 7  # need the ratio of p and q to be e
 q = 1. / 7
 s = 1 - p - q  # this has it around .47
-bdy_plus = 2
-bdy_minus = -1
+bdy_plus = 60
+bdy_minus = -10
 evidence_amounts = np.array((1, 0, -1))
 soc_ev = np.zeros(length)
 
@@ -31,38 +31,37 @@ for i in range(length):
 obs1 = np.random.multinomial(1, [p,s,q], size=length)
 obs2 = np.random.multinomial(1, [p,s,q], size=length)
 
+#  Compute the evidence gained from each observation.
 llr1 = np.matmul(obs1, evidence_amounts)
 llr2 = np.matmul(obs2, evidence_amounts)
-ev1 = np.cumsum(llr1)
-ev2 = np.cumsum(llr2)
 
-done1 = 0
+#  Compute the private evidence time series for both agents.
+ev1 = np.cumsum(llr1)
+ag2_private = np.cumsum(llr2)
+
+
+done1 = 0  # To stop gathering evidence after hitting a threshold.
 done2 = 0
+ag1_fire = 0  # To record the firing time of agent 1.
+
 for i in range(ev1.size):
     if done1 == 0:
-        if ev1[i] >= bdy_plus:
-            ev1[i] = bdy_plus
-            done1 = 1
+        if ev1[i] >= bdy_plus:  # Check if 1's private info has hit a boundary
+            ev1[i] = bdy_plus  # Fix it at that boundary.
+            done1 = 1  # Stop accumulating.
+            ag1_fire = i  # Record time.
         elif ev1[i] <= bdy_minus:
             ev1[i] = bdy_minus
             done1 = 1
+            ag1_fire = i
     else:
-        ev1[i] = ev1[i-1]
+        ev1[i] = ev1[i-1]  # When the accumulation is done, just keep it at that last threshold value.
 
-for i in range(ev2.size):
-    if done2 == 0:
-        if ev2[i] >= bdy_plus:
-            ev2[i] = bdy_plus
-            done2 = 1
-        elif ev2[i] <= bdy_minus:
-            ev2[i] = bdy_minus
-            done2 = 1
-    else:
-        ev2[i] = ev2[i - 1]
 
-# The last part here plots time (in steps) against the accumulated evidence. After adding modifications to the plot we
-# then call it using the show() method.
-plt.figure(1)
+
+
+plt.figure(figsize=(8, 4))  # Start the figure
+
 
 plt.subplot(121)  # subplot(mni) puts the next plot in the i-th location of m by n multiplot
 plt.scatter(np.arange(length+1), np.hstack((0,ev1)))
@@ -129,12 +128,30 @@ for i in range(1, N):
 # print stateTrackP
 # print stateTrackM
 
-evidence = np.log(survivalProbPlus / survivalProbMinus)
+ag2_social = np.log(survivalProbPlus / survivalProbMinus)
+ag2_social[ag1_fire:] = ev1[ag1_fire] # No non-decision evidence after the first agent decides.
+# Compute the LLR by adding the private and bump to the non-decision social evidence.
+ev2 = ag2_private + ag2_social
 
-max_ev = np.ceil(np.max(evidence))
-plt.scatter(np.arange(N+1), np.hstack((0, evidence)), c='red', label='Soc')
-plt.scatter(np.arange(length+1), np.hstack((0,ev2)), c='purple', label='Priv')
-plt.scatter(np.arange(length+1), np.hstack((0, evidence)) + np.hstack((0,ev2)), c='orange', label=r'$y^{(2)}$')
+# Compute the time series by using the threshold check.
+for i in range(ev2.size):
+    if done2 == 0:
+        if ev2[i] >= bdy_plus:
+            ev2[i] = bdy_plus
+            done2 = 1
+            ag2_fire = i
+        elif ev2[i] <= bdy_minus:
+            ev2[i] = bdy_minus
+            done2 = 1
+            ag2_fire = i
+    else:
+        ev2[i] = ev2[i - 1]
+
+
+max_ev = np.ceil(np.max(ag2_social))
+plt.scatter(np.arange(N+1), np.hstack((0, ag2_social)), c='red', label='Soc')
+plt.scatter(np.arange(ag2_fire+1), np.hstack((0,ag2_private[:ag2_fire])), c='purple', label='Priv')
+plt.scatter(np.arange(N+1), np.hstack((0,ev2)), c='orange', label=r'$y^{(2)}$')
 
 plt.legend()
 plt.xlabel('Time')
@@ -145,5 +162,6 @@ plt.ylabel('Evidence')
 # plt.title('Non-Decision Evidence for ' + r'$\theta_- = $' + str(negThresh) + r', $\theta_+ = $' + str(posThresh))
 plt.title('Agent 2')
 
+plt.tight_layout()
 plt.show()
 
